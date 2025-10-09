@@ -118,7 +118,7 @@ export default class MyShatelMobileStatus extends Extension {
         let refreshItem = new PopupMenu.PopupMenuItem("🔄 Refresh Status");
         refreshItem.connect('activate', () => {
             log('MyShatelMobileStatus: Refresh clicked');
-            label.set_text("📡  Loading2...");
+            label.set_text("📡  Loading...");
             _updateLabel();
         });
         this._indicator.menu.addMenuItem(refreshItem);
@@ -157,7 +157,7 @@ export default class MyShatelMobileStatus extends Extension {
         curlString = this.settings.get_string('curl-string');
 
 
-        this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
+        this._indicator = new PanelMenu.Button(0.5, this.metadata.name, false);
 
         label = new St.Label({
             text: "📡  Loading...",
@@ -167,6 +167,7 @@ export default class MyShatelMobileStatus extends Extension {
         this._indicator.add_child(label);
 
         this._addMenuActions();
+        this._indicator.menu.setSourceAlignment(0.5)
         
         Main.panel.addToStatusArea(
             this.uuid,
