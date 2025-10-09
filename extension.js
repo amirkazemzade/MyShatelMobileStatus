@@ -125,6 +125,14 @@ export default class MyShatelMobileStatus extends Extension {
             y_expand: true  
         });
         this._indicator.add_child(label);
+
+        this._indicator.connect('event', (actor, event) => {
+            if (event.get_button() === 1) {
+                _updateLabel();
+                label.set_text("📡  Loading...");
+            }
+            return Clutter.EVENT_PROPAGATE;
+        });
         
         Main.panel.addToStatusArea(
             this.uuid,
