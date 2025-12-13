@@ -1,5 +1,6 @@
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import GioUnix from 'gi://GioUnix';
 import Gio from 'gi://Gio';
@@ -109,6 +110,45 @@ function _getValueWithLastValues() {
 }
 
 export default class MyShatelMobileStatus extends Extension {
+     _addMenuActions() {
+        // Clear any existing menu items first
+        this._indicator.menu.removeAll();
+
+        // 1. Refresh Status Item
+        let refreshItem = new PopupMenu.PopupMenuItem("🔄 Refresh Status");
+        refreshItem.connect('activate', () => {
+            log('MyShatelMobileStatus: Refresh clicked');
+            label.set_text("📡  Loading...");
+            _updateLabel();
+        });
+        this._indicator.menu.addMenuItem(refreshItem);
+
+        // 2. Open Website Item (Replace with your actual URL)
+        let openWebsiteItem = new PopupMenu.PopupMenuItem("🌐 Open My Shatel Website");
+        openWebsiteItem.connect('activate', () => {
+            log('MyShatelMobileStatus: Open Website clicked');
+            const websiteUrl = 'https://my.shatelmobile.ir/';
+            // Get the current timestamp (0 is usually fine for a non-time-critical launch)
+            let timestamp = 0;
+            // Get the current workspace index
+            let workspace = global.workspace_manager.get_active_workspace().index();
+            Gio.AppInfo.launch_default_for_uri(websiteUrl, global.create_app_launch_context(timestamp, workspace));
+        });
+        this._indicator.menu.addMenuItem(openWebsiteItem);
+
+
+        // 3. Open Extension Settings Item
+        // PanelMenu includes a utility to add a settings button automatically
+
+        const settingsItem = new PopupMenu.PopupMenuItem("⚙️ Settings");
+        settingsItem.connect('activate', () => {
+            // Note: this.uuid is the UUID of your extension
+            let extensionObject = Extension.lookupByUUID(this.uuid);
+            extensionObject.openPreferences()
+        });
+        this._indicator.menu.addMenuItem(settingsItem);
+    }
+
     enable() {
         this.settings = this.getSettings();
 
@@ -117,7 +157,7 @@ export default class MyShatelMobileStatus extends Extension {
         curlString = this.settings.get_string('curl-string');
 
 
-        this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
+        this._indicator = new PanelMenu.Button(0.5, this.metadata.name, false);
 
         label = new St.Label({
             text: "📡  Loading...",
@@ -125,6 +165,9 @@ export default class MyShatelMobileStatus extends Extension {
             y_expand: true  
         });
         this._indicator.add_child(label);
+
+        this._addMenuActions();
+        this._indicator.menu.setSourceAlignment(0.5)
         
         Main.panel.addToStatusArea(
             this.uuid,
@@ -169,6 +212,8 @@ export default class MyShatelMobileStatus extends Extension {
             });
             this._indicator.add_child(label);
 
+            this._addMenuActions();
+
             Main.panel.addToStatusArea(
                 this.uuid,
                 this._indicator,
@@ -188,6 +233,8 @@ export default class MyShatelMobileStatus extends Extension {
                 y_expand: true  
             });
             this._indicator.add_child(label);
+
+            this._addMenuActions();
 
             Main.panel.addToStatusArea(
                 this.uuid,
